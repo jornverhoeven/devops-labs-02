@@ -16,8 +16,9 @@ before_script:
     - node_modules/.bin/newman --version  
     
 script:
+- npm run test
 - npm run build
-- npmd run package:linux
+- npm run package:linux
 - docker build -t jjverhoeven/devops-labs-02:1.0.0 .
 - docker run --name example_api -d -t -p 127.0.0.1:8080:3000 jjverhoeven/devops-labs-02:1.0.0
 - docker ps
