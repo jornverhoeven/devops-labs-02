@@ -1,0 +1,159 @@
+swagger: "2.0"
+info:
+  description: "Swagger tutorial"
+  version: "1.0.0"
+  title: "Swagger tutorial"
+basePath: "/api"
+schemes:
+- "http"
+paths:
+  /student:
+    get:
+      summary: "List all students"
+      description: "Returns an array of students"
+      operationId: "listStudents"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "subject"
+        in: "query"
+        description: "The subject name"
+        required: false
+        type: "string"
+      - name: "first_name"
+        in: "query"
+        description: "The first name"
+        required: false
+        type: "string"
+      - name: "last_name"
+        in: "query"
+        description: "The last name"
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Student"
+    post:
+      summary: "Add a new student"
+      description: ""
+      operationId: "addStudent"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Student object that needs to be added"
+        required: true
+        schema:
+          $ref: "#/definitions/Student"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            type: "integer"
+            format: "int64"
+        400:
+          description: "Invalid input"
+        409:
+          description: "already exists"
+  /student/{student_id}:
+    get:
+      summary: "Find student by ID"
+      description: "Returns a single student"
+      operationId: "getStudentById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "student_id"
+        in: "path"
+        description: "ID of student to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Student"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Student not found"
+    put:
+      summary: "Update an existing student"
+      description: ""
+      operationId: "updateStudent"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "student_id"
+        in: "path"
+        description: "ID of student to update"
+        required: true
+        type: "integer"
+        format: "int64"
+      - in: "body"
+        name: "body"
+        description: "Student object that needs to be updated"
+        required: true
+        schema:
+          $ref: "#/definitions/Student"
+      responses:
+        200:
+          description: "successful operation"
+          schema: 
+            type: "integer"
+            format: "int64"
+        400:
+          description: "Invalid input"
+        404:
+          description: "Student not found"
+    delete:      
+      summary: "Delete a student"
+      description: ""
+      operationId: "deleteStudent"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "student_id"
+        in: "path"
+        description: "ID of student to delete"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:      
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/Student"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Student not found"
+          
+definitions:
+  Student:
+    type: "object"
+    properties:
+      student_id:
+        type: "integer"
+      first_name:
+        type: "string"
+      last_name:
+        type: "string"
+      grades:
+        type: "object"
+        additionalProperties:
+          type: "number"
+        example:
+          devops: 8.0
+          softwareProcess: 8.0
+          
