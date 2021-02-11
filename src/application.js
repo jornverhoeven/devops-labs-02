@@ -56,7 +56,7 @@ export class Application {
         this.server.use(this.httpErrorHandler.bind(this));
 
         this.logger.debug('Starting server');
-        const port = 3000;
+        const port = 8080;
         const host = `http://localhost:${port}`;
         this.serverInstance = this.server.listen(port);
         this.logger.debug(`Server started and listening on ${underline(host)}`);
@@ -132,7 +132,7 @@ export class Application {
 
             if (controller instanceof RestController) {
                 if (controller.isApiRoute()) {
-                    this.server.use('/api', controller.getRouter());
+                    this.server.use('/service-api', controller.getRouter());
                 } else {
                     this.server.use(controller.getRouter());
                 }
