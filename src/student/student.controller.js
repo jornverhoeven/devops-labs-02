@@ -74,7 +74,6 @@ export class StudentController extends RestController {
         try {
             const student = makeStudent(body);
             const data = await this.studentService.create(student);
-            this.logger.debug('New student', data.student_id, data)
             return { data: data['student_id'] };
         } catch (e) {
             if (e.message.startsWith('student with id') || e.message === 'student already exists')

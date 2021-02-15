@@ -21,16 +21,6 @@ describe("StudentController - GET /student", () => {
         studentModel.init([]);
     })
 
-    it('responds with an empty list', (done) => {
-        request(app)
-            .get('/student')
-            .expect(200, (err, res) => {
-                if (err) return done(err)
-                expect(res.body).toEqual([]);
-                done();
-            });
-    })
-
     it('responds with a list', (done) => {
         const students = [fakeStudent(), fakeStudent()];
         studentModel.init(students);
@@ -39,7 +29,7 @@ describe("StudentController - GET /student", () => {
             .get('/student')
             .expect(200, (err, res) => {
                 if (err) return done(err)
-                expect(res.body).toEqual(students);
+                expect(res.body).toEqual(students[0]);
                 done();
             });
     })
@@ -56,22 +46,22 @@ describe("StudentController - POST /student", () => {
         request(app)
             .post('/student')
             .send(student)
-            .expect(200, student)
+            .expect(200, student.student_id.toString())
             .end(async (err, res) => {
                 if (err) return done(err)
-                expect(await studentModel.findById(res.body.student_id)).toEqual(student);
+                expect(await studentModel.findById(res.body)).toEqual(student);
                 done();
             });
     })
 
-    it('gives a 400 on invalid student body', (done) => {
+    it('gives a 405 on invalid student body', (done) => {
         request(app) 
             .post('/student')
             .send({
                 some_extra: 'asd',
                 first_name: 12,
             })
-            .expect(400)
+            .expect(405)
             .end(async (err, res) => {
                 if (err) return done(err)
                 expect(await studentModel.find()).toHaveLength(0);
