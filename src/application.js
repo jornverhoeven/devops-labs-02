@@ -3,7 +3,7 @@ import { Controller, RestController } from "./controller";
 import simpleLogger from "./utils/simpleLogger";
 import { yellow, underline } from "chalk";
 import bodyParser from "body-parser";
-import { HttpError, InternalServerErrorHttpError, MethodNotAllowedHttpError } from "./errors";
+import { HttpError, InternalServerErrorHttpError, MethodNotAllowedHttpError } from "./errors/http";
 import onFinished from "on-finished";
 
 export class Application {

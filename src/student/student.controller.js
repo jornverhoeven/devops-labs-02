@@ -1,5 +1,6 @@
 import { RestController } from "../controller";
-import { BadRequestHttpError, ConflictHttpError, NotFoundHttpError, ValidationError } from "../errors";
+import { ValidationError } from "../errors";
+import { BadRequestHttpError, ConflictHttpError, NotFoundHttpError, MethodNotAllowedHttpError } from "../errors/http";
 import handleRequest from "../utils/handleRequest";
 import requiredField from "../utils/requiredField";
 import { makeStudent } from "./student.models";
@@ -33,23 +34,31 @@ export class StudentController extends RestController {
         const { subject, first_name, last_name } = req.query;
 
         const predicates = [];
-        if ( subject ) predicates.push(s => subject in s.grades);
-        if ( first_name ) predicates.push(s => s.first_name === first_name);
-        if ( last_name ) predicates.push(s => s.last_name === last_name);
+        if (subject) predicates.push(s => subject in s.grades);
+        if (first_name) predicates.push(s => s.first_name === first_name);
+        if (last_name) predicates.push(s => s.last_name === last_name);
 
         return {
-            data: await this.studentService.getAll(s => predicates.every(p => p(s)))
+            data: (await this.studentService.getAll(s => predicates.every(p => p(s))))[0]
         };
     }
 
     async get(req) {
         const { id = requiredField('id') } = req.params;
-        
-        if ( typeof id === 'string' && !Number.isInteger(parseInt(id)))
+        const { subject } = req.query;
+
+
+        if (typeof id === 'string' && !Number.isInteger(parseInt(id)))
             throw new BadRequestHttpError('invalid_id', 'Invalid ID supplied');
-        
+
+        const predicates = [];
+        predicates.push(s => s.student_id === parseInt(id));
+        if (subject) predicates.push(s => subject in s.grades);
+
+
         try {
-            const student = await this.studentService.get(id)
+            const student = (await this.studentService.getAll(s => predicates.every(p => p(s))))[0];
+            if (!student) throw new Error('not_found');
             return {
                 data: student
             };
@@ -64,14 +73,14 @@ export class StudentController extends RestController {
         const { body = requiredField('body') } = req;
         try {
             const student = makeStudent(body);
-            return {
-                data: await this.studentService.create(student)
-            };
+            const data = await this.studentService.create(student);
+            this.logger.debug('New student', data.student_id, data)
+            return { data: data['student_id'] };
         } catch (e) {
-            if ( e.message.startsWith('student with id')) 
+            if (e.message.startsWith('student with id') || e.message === 'student already exists')
                 throw new ConflictHttpError(e.message, e.description);
-            if ( e instanceof ValidationError ) 
-                throw new BadRequestHttpError('invalid_student_body', e.message);
+            if (e instanceof ValidationError)
+                throw new MethodNotAllowedHttpError('invalid_student_body', e.message);
             throw e;
         }
     }
@@ -80,7 +89,7 @@ export class StudentController extends RestController {
         const { id = requiredField('id') } = req.params;
         const { body = requiredField('body') } = req;
 
-        if ( typeof id === 'string' && !Number.isInteger(parseInt(id)))
+        if (typeof id === 'string' && !Number.isInteger(parseInt(id)))
             throw new BadRequestHttpError('invalid_id', 'Invalid ID supplied');
 
         try {
@@ -89,9 +98,9 @@ export class StudentController extends RestController {
                 data: await this.studentService.update(id, student)
             };
         } catch (e) {
-            if ( e.message.startsWith('not_found')) 
+            if (e.message.startsWith('not_found'))
                 throw new NotFoundHttpError(e.message, e.description);
-            if ( e instanceof ValidationError ) 
+            if (e instanceof ValidationError)
                 throw new BadRequestHttpError('invalid_student_body', e.message);
             throw e;
         }
@@ -100,15 +109,14 @@ export class StudentController extends RestController {
     async delete(req) {
         const { id = requiredField('id') } = req.params;
 
-        if ( typeof id === 'string' && !Number.isInteger(parseInt(id)))
+        if (typeof id === 'string' && !Number.isInteger(parseInt(id)))
             throw new BadRequestHttpError('invalid_id', 'Invalid ID supplied');
 
         try {
-            return {
-                data: await this.studentService.delete(id)
-            };
+            const data = await this.studentService.delete(parseInt(id));
+            return { data };
         } catch (e) {
-            if ( e.message === 'not-found') 
+            if (e.message === 'not_found')
                 throw new NotFoundHttpError(e.message, e.description);
             throw e;
         }

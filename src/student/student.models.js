@@ -13,7 +13,7 @@ export function makeStudent(studentInfo, options = {}) {
         const { 
             first_name = requiredField('first_name'),
             last_name = requiredField('last_name'),
-            grades = requiredField('grades'),
+            grades, // = requiredField('grades'),
             student_id,
             ...rest
         } = student;
@@ -24,7 +24,7 @@ export function makeStudent(studentInfo, options = {}) {
             throw new ValidationError('first_name', `'first_name' must be a string`);
         if (typeof last_name !== 'string')
             throw new ValidationError('last_name',`'last_name' must be a string`);
-        if (typeof grades !== 'object') 
+        if (grades && typeof grades !== 'object') 
             throw new ValidationError('grades', `'grades' must be a map`);
         // TODO: Consider checking type of all keys and values
 
@@ -45,7 +45,8 @@ export function makeStudent(studentInfo, options = {}) {
     }
 }
 
-export function makeStudentModel() {
+export function makeStudentModel(options = {}) {
+    const { logger = simpleLogger() } = options; 
     let store = [];
 
     return Object.freeze({
@@ -82,6 +83,11 @@ export function makeStudentModel() {
     }
 
     async function create(student) {
+        const exists = store.find(s => 
+            s.first_name === student.first_name 
+            || s.last_name === student.last_name);
+        if (exists) throw new Error(`student already exists`);
+
         if (!student.student_id) {
             const s = {
                 ...student,
@@ -93,6 +99,7 @@ export function makeStudentModel() {
 
         const index = store.findIndex(s => s.student_id === student.student_id);
         if (index !== -1) throw new Error(`student with id '${student.student_id}' already exists`);
+
         store.push(student);
         return Promise.resolve(student);
     }
@@ -113,7 +120,7 @@ export function makeStudentModel() {
     }
 
     function getNewId() {
-        const ids = store.map(s => s.student_id).sort();
-        return ids[ids.length - 1]+1;
+        const ids = store.map(s => s.student_id).sort((a, b) => a-b);
+        return (ids[ids.length - 1] || 0)+1;
     }
 }
