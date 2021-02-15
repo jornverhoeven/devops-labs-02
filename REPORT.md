@@ -8,6 +8,11 @@ This was done because of my professional experience with NodeJS web applications
 
 ---
 
+Link to [Git repository (jornverhoeven/devops-labs-02)](https://github.com/jornverhoeven/devops-labs-02)
+
+Link to [Docker hub (jjverhoeven/devops-labs-02)](https://hub.docker.com/repository/docker/jjverhoeven/devops-labs-02)
+
+
 ## Introduction
 
 - **Plan**: The initial steps were setting up the expectations of the service. Using Swagger to generate a formal API description with expected in- and outputs.
