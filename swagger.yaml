@@ -3,7 +3,7 @@ info:
   description: "Swagger tutorial"
   version: "1.0.0"
   title: "Swagger tutorial"
-basePath: "/api"
+basePath: "/service-api"
 schemes:
 - "http"
 paths:
